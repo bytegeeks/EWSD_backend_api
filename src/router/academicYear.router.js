@@ -9,8 +9,22 @@ router.post(
     AcademicYearController.createAcademicYear
 );
 
-router.post("/view-academic-year", authentication, AcademicYearController.viewAcademicYear);
+router.post(
+    "/view-academic-year",
+    authentication,
+    AcademicYearController.viewAcademicYear
+);
 
-router.post("/edit-academic-year", authentication, AcademicYearController.editAcademicYear);
+router.post(
+    "/view-all-academic-year",
+    authentication,
+    AcademicYearController.viewAllAcademicYear
+);
+
+router.post(
+    "/edit-academic-year",
+    authentication,
+    AcademicYearController.editAcademicYear
+);
 
 module.exports = router;

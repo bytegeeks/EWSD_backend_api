@@ -1,6 +1,26 @@
 const Category = require("../model/category.model");
 const crypto = require("crypto");
 
+const getCategoryCount = async (req, res, next) => {
+    try {
+        const categories = await Category.find({}, { _id: 0, __v: 0 });
+        if (categories) {
+            return res.status(200).send({
+                status: true,
+                message: "category count retrieved successfully",
+                category_count: categories.length,
+            });
+        } else {
+            return res.status(400).send({
+                status: false,
+                message: "category count fetch fail",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
 const createCategory = async (req, res, next) => {
     try {
         let category = req.body.category;
@@ -64,6 +84,27 @@ const viewCategory = async (req, res, next) => {
     }
 };
 
+const viewAllCategory = async (req, res, next) => {
+    try {
+        const categories = await Category.find({}, { _id: 0, __v: 0 });
+
+        if (categories) {
+            return res.status(200).send({
+                status: true,
+                message: "categories fetch successful",
+                data: categories,
+            });
+        } else {
+            return res.status(400).send({
+                status: false,
+                message: "categories fetch failed",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
 const editCategory = async (req, res, next) => {
     try {
         let category_id = req.body.category_id;
@@ -117,4 +158,6 @@ module.exports = {
     viewCategory,
     editCategory,
     deleteCategory,
+    getCategoryCount,
+    viewAllCategory,
 };

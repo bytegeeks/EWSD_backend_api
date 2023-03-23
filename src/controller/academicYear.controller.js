@@ -66,6 +66,27 @@ const viewAcademicYear = async (req, res, next) => {
     }
 };
 
+const viewAllAcademicYear = async (req, res, next) => {
+    try {
+        const academic_years = await AcademicYear.find({}, { _id: 0, __v: 0 });
+
+        if (academic_years) {
+            return res.status(200).send({
+                status: true,
+                message: "academic_years fetch successful",
+                data: academic_years,
+            });
+        } else {
+            return res.status(400).send({
+                status: false,
+                message: "academic_years fetch failed",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
 const editAcademicYear = async (req, res, next) => {
     try {
         let academic_year_id = req.body.academic_year_id;
@@ -96,4 +117,5 @@ module.exports = {
     createAcademicYear,
     viewAcademicYear,
     editAcademicYear,
+    viewAllAcademicYear,
 };

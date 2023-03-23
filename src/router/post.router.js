@@ -37,4 +37,6 @@ router.post(
     PostController.removeDislikePost
 );
 
+router.post("/get-post-count", authentication, PostController.getPostCount);
+
 module.exports = router;

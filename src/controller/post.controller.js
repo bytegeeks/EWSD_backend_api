@@ -2,6 +2,26 @@ const Post = require("../model/post.model");
 const Rating = require("../model/rating.model");
 const crypto = require("crypto");
 
+const getPostCount = async (req, res, next) => {
+    try {
+        const posts = await Post.find({}, { _id: 0, __v: 0 });
+        if (posts) {
+            return res.status(200).send({
+                status: true,
+                message: "post count retrieved successfully",
+                post_count: posts.length,
+            });
+        } else {
+            return res.status(400).send({
+                status: false,
+                message: "post count fetch fail",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
 const likePost = async (req, res, next) => {
     try {
         let rating = {
@@ -149,6 +169,7 @@ const createPost = async (req, res, next) => {
         let post = req.body.post;
 
         post["post_id"] = crypto.randomUUID();
+        post["user_id"] = req.body.user_id
 
         const postRes = await new Post(post).save();
         if (postRes) {
@@ -204,7 +225,7 @@ const viewAllPost = async (req, res, next) => {
     //     }
     // },
     try {
-        const posts = await Post.find({}, { _id: 0, __v: 0 });
+        const posts = await Post.find({}, { _id: 0, __v: 0 }).sort({post_date: -1});
         if (posts) {
             return res.status(200).send({
                 status: true,
@@ -326,4 +347,5 @@ module.exports = {
     removeLikePost,
     dislikePost,
     removeDislikePost,
+    getPostCount,
 };

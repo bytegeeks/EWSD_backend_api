@@ -11,6 +11,8 @@ router.post(
 
 router.post("/view-category", authentication, CategoryController.viewCategory);
 
+router.post("/view-all-category", authentication, CategoryController.viewAllCategory);
+
 router.post("/edit-category", authentication, CategoryController.editCategory);
 
 router.post(
@@ -18,5 +20,7 @@ router.post(
     authentication,
     CategoryController.deleteCategory
 );
+
+router.post("/get-category-count", CategoryController.getCategoryCount);
 
 module.exports = router;
