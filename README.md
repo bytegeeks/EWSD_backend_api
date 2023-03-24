@@ -17,3 +17,5 @@ docker-compose -f mongo-docker-compose.yml up -d
 ```bash 
 npm run serve
 ```
+### connect to the mongodb server with mongodb compass
+### create a collection user in ewsd_db, and import the user.json file to seed user data
