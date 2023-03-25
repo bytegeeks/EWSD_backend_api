@@ -4,6 +4,7 @@ const _ = require("lodash");
 
 const { getHash } = require("../utils/password.util");
 const { generateJWT } = require("../utils/jwt.util");
+const Role = require("../utils/fixtures/role.enum");
 
 const getAllUser = async (req, res, next) => {
     try {
@@ -28,7 +29,7 @@ const getAllUser = async (req, res, next) => {
 const getQACoordinator = async (req, res, next) => {
     try {
         const users = await UserModel.find(
-            { user_role_id: "3" },
+            { user_role_id: Role.QA_COORDINATOR },
             { __v: 0, _id: 0 }
         );
         if (users) {
