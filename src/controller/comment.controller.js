@@ -52,7 +52,9 @@ const viewComment = async (req, res, next) => {
 
 const viewAllComments = async (req, res, next) => {
     try {
-        const comments = await Comment.find({}, { _id: 0, __v: 0 });
+        const comments = await Comment.find({}, { _id: 0, __v: 0 }).sort({
+            comment_date: -1,
+        });
 
         if (comments) {
             return res.status(200).send({
@@ -74,9 +76,9 @@ const viewAllComments = async (req, res, next) => {
 const viewAnonComments = async (req, res, next) => {
     try {
         const comments = await Comment.find(
-            { comment_type: false },
+            { comment_type: true },
             { _id: 0, __v: 0 }
-        );
+        ).sort({ comment_date: -1 });
 
         if (comments) {
             return res.status(200).send({

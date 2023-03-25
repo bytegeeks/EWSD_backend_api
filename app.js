@@ -8,6 +8,7 @@ const corsOptions = {
 };
 
 const app = express();
+app.use(express.static("public"));
 
 const userRouter = require("./src/router/user.router");
 const categoryRouter = require("./src/router/category.router");
@@ -15,6 +16,7 @@ const departmentRouter = require("./src/router/department.router");
 const academicYearRouter = require("./src/router/academicYear.router");
 const postRouter = require("./src/router/post.router");
 const commentRouter = require("./src/router/comment.router");
+const fileRouter = require("./src/router/file.router");
 
 app.use(cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -30,6 +32,7 @@ app.use("/department", departmentRouter);
 app.use("/academic-year", academicYearRouter);
 app.use("/post", postRouter);
 app.use("/comment", commentRouter);
+app.use("/file", fileRouter);
 
 app.listen(PORT, () => {
     console.log(`server is listening on http://localhost:${PORT}`);

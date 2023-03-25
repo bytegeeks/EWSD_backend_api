@@ -27,15 +27,7 @@ router.post("/edit-post", authentication, PostController.editPost);
 
 router.post("/like-post", authentication, PostController.likePost);
 
-router.post("/remove-like-post", authentication, PostController.removeLikePost);
-
 router.post("/dislike-post", authentication, PostController.dislikePost);
-
-router.post(
-    "/remove-dislike-post",
-    authentication,
-    PostController.removeDislikePost
-);
 
 router.post("/get-post-count", authentication, PostController.getPostCount);
 

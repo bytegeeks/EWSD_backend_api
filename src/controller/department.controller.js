@@ -163,7 +163,7 @@ const getDepartmentStats = async (req, res, next) => {
                 const { dept_id, dept_name } = departments[i];
 
                 // get posts by dept_id
-                const posts = await Post.find({ dept_id }, { _id: 0, __v: 0 });
+                const posts = await Post.find({ dept_name }, { _id: 0, __v: 0 });
                 let idea_post_count = 0;
                 if (posts) {
                     idea_post_count = posts.length;

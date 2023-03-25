@@ -24,30 +24,25 @@ const getPostCount = async (req, res, next) => {
 
 const likePost = async (req, res, next) => {
     try {
-        let rating = {
-            rating_id: crypto.randomUUID(),
-            user_id: req.body.user_id,
-            post_id: req.body.post_id,
-            rating_type: req.body.rating_type,
-        };
+        await Post.updateOne(
+            { post_id: req.body.post_id },
+            { $pull: { post_dislikes: req.body.user_id } }
+        );
 
-        const ratingRes = await new Rating(rating).save();
-        if (ratingRes) {
-            const result = await Post.findOneAndUpdate(
-                { post_id: rating.post_id },
-                { $inc: { post_likes: 1 } }
-            );
-            if (result) {
-                return res.status(200).send({
-                    status: true,
-                    message: "like added successfully",
-                });
-            } else {
-                return res.status(400).send({
-                    status: false,
-                    message: "like added fail",
-                });
-            }
+        await Post.updateOne(
+            { post_id: req.body.post_id },
+            { $pull: { post_likes: req.body.user_id } }
+        );
+
+        const result = await Post.updateOne(
+            { post_id: req.body.post_id },
+            { $push: { post_likes: req.body.user_id } }
+        );
+        if (result) {
+            return res.status(200).send({
+                status: true,
+                message: "like added successfully",
+            });
         } else {
             return res.status(400).send({
                 status: false,
@@ -59,66 +54,61 @@ const likePost = async (req, res, next) => {
     }
 };
 
-const removeLikePost = async (req, res, next) => {
-    try {
-        const user_id = req.body.user_id;
-        const post_id = req.body.post_id;
+// const removeLikePost = async (req, res, next) => {
+//     try {
+//         const user_id = req.body.user_id;
+//         const post_id = req.body.post_id;
 
-        const ratingRes = await Rating.findOneAndDelete({ user_id, post_id });
+//         const ratingRes = await Rating.findOneAndDelete({ user_id, post_id });
 
-        if (ratingRes) {
-            const result = await Post.findOneAndUpdate(
-                { post_id },
-                { $inc: { post_likes: -1 } }
-            );
-            if (result) {
-                return res.status(200).send({
-                    status: true,
-                    message: "like removed successfully",
-                });
-            } else {
-                return res.status(400).send({
-                    status: false,
-                    message: "like removed fail",
-                });
-            }
-        } else {
-            return res.status(400).send({
-                status: false,
-                message: "like removed fail",
-            });
-        }
-    } catch (error) {
-        next(error);
-    }
-};
+//         if (ratingRes) {
+//             const result = await Post.findOneAndUpdate(
+//                 { post_id },
+//                 { $inc: { post_likes: -1 } }
+//             );
+//             if (result) {
+//                 return res.status(200).send({
+//                     status: true,
+//                     message: "like removed successfully",
+//                 });
+//             } else {
+//                 return res.status(400).send({
+//                     status: false,
+//                     message: "like removed fail",
+//                 });
+//             }
+//         } else {
+//             return res.status(400).send({
+//                 status: false,
+//                 message: "like removed fail",
+//             });
+//         }
+//     } catch (error) {
+//         next(error);
+//     }
+// };
 
 const dislikePost = async (req, res, next) => {
     try {
-        let rating = {
-            rating_id: crypto.randomUUID(),
-            user_id: req.body.user_id,
-            post_id: req.body.post_id,
-            rating_type: req.body.rating_type,
-        };
+        await Post.updateOne(
+            { post_id: req.body.post_id },
+            { $pull: { post_likes: req.body.user_id } }
+        );
 
-        const ratingRes = await new Rating(rating).save();
-        if (ratingRes) {
-            const result = await Post.findOneAndUpdate(
-                { post_id: rating.post_id },
-                { $inc: { post_dislikes: 1 } }
-            );
-            if (result) {
-                return res.status(200).send({
-                    status: true,
-                    message: "dislike added successfully",
-                });
-            } else {
-                return res.status(400).send({
-                    status: false,
-                    message: "dislike added fail",
-                });
-            }
+        await Post.updateOne(
+            { post_id: req.body.post_id },
+            { $pull: { post_dislikes: req.body.user_id } }
+        );
+
+        const result = await Post.updateOne(
+            { post_id: req.body.post_id },
+            { $push: { post_dislikes: req.body.user_id } }
+        );
+        if (result) {
+            return res.status(200).send({
+                status: true,
+                message: "dislike added successfully",
+            });
         } else {
             return res.status(400).send({
                 status: false,
@@ -130,46 +120,46 @@ const dislikePost = async (req, res, next) => {
     }
 };
 
-const removeDislikePost = async (req, res, next) => {
-    try {
-        const user_id = req.body.user_id;
-        const post_id = req.body.post_id;
+// const removeDislikePost = async (req, res, next) => {
+//     try {
+//         const user_id = req.body.user_id;
+//         const post_id = req.body.post_id;
 
-        const ratingRes = await Rating.findOneAndDelete({ user_id, post_id });
+//         const ratingRes = await Rating.findOneAndDelete({ user_id, post_id });
 
-        if (ratingRes) {
-            const result = await Post.findOneAndUpdate(
-                { post_id },
-                { $inc: { post_dislikes: -1 } }
-            );
-            if (result) {
-                return res.status(200).send({
-                    status: true,
-                    message: "dislike removed successfully",
-                });
-            } else {
-                return res.status(400).send({
-                    status: false,
-                    message: "dislike removed fail",
-                });
-            }
-        } else {
-            return res.status(400).send({
-                status: false,
-                message: "dislike removed fail",
-            });
-        }
-    } catch (error) {
-        next(error);
-    }
-};
+//         if (ratingRes) {
+//             const result = await Post.findOneAndUpdate(
+//                 { post_id },
+//                 { $inc: { post_dislikes: -1 } }
+//             );
+//             if (result) {
+//                 return res.status(200).send({
+//                     status: true,
+//                     message: "dislike removed successfully",
+//                 });
+//             } else {
+//                 return res.status(400).send({
+//                     status: false,
+//                     message: "dislike removed fail",
+//                 });
+//             }
+//         } else {
+//             return res.status(400).send({
+//                 status: false,
+//                 message: "dislike removed fail",
+//             });
+//         }
+//     } catch (error) {
+//         next(error);
+//     }
+// };
 
 const createPost = async (req, res, next) => {
     try {
         let post = req.body.post;
 
         post["post_id"] = crypto.randomUUID();
-        post["user_id"] = req.body.user_id
+        post["user_id"] = req.body.user_id;
 
         const postRes = await new Post(post).save();
         if (postRes) {
@@ -225,7 +215,9 @@ const viewAllPost = async (req, res, next) => {
     //     }
     // },
     try {
-        const posts = await Post.find({}, { _id: 0, __v: 0 }).sort({post_date: -1});
+        const posts = await Post.find({}, { _id: 0, __v: 0 }).sort({
+            post_date: -1,
+        });
         if (posts) {
             return res.status(200).send({
                 status: true,
@@ -344,8 +336,6 @@ module.exports = {
     viewLatestPost,
     editPost,
     likePost,
-    removeLikePost,
     dislikePost,
-    removeDislikePost,
     getPostCount,
 };
