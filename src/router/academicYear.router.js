@@ -27,4 +27,16 @@ router.post(
     AcademicYearController.editAcademicYear
 );
 
+router.post(
+    "/get-latest-active-academic-year",
+    authentication,
+    AcademicYearController.getLatestActiveAcademicYear
+);
+
+router.post(
+    "/delete-academic-year",
+    authentication,
+    AcademicYearController.deleteAcademicYear
+);
+
 module.exports = router;
