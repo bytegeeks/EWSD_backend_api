@@ -9,5 +9,7 @@ router.post("/get-user-count", authentication, UserController.getUserCount);
 router.post("/get-user-profile", authentication, UserController.getUserProfile);
 router.post("/get-all-user", authentication, UserController.getAllUser);
 router.post("/get-qa-coor", authentication, UserController.getQACoordinator);
+router.post("/edit-user", authentication, UserController.editUser);
+router.post("/delete-user", authentication, UserController.deleteUser);
 
 module.exports = router;

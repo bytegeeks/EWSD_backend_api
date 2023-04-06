@@ -6,6 +6,54 @@ const { getHash } = require("../utils/password.util");
 const { generateJWT } = require("../utils/jwt.util");
 const Role = require("../utils/fixtures/role.enum");
 
+const editUser = async (req, res, next) => {
+    try {
+        let user_id = req.body.user_id;
+        let new_user_params = req.body.user;
+
+        const result = await UserModel.findOneAndUpdate(
+            { user_id },
+            new_user_params
+        );
+
+        if (result) {
+            return res.status(200).send({
+                status: true,
+                message: "user update success",
+            });
+        } else {
+            return res.status(400).send({
+                status: false,
+                message: "user update fail",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+const deleteUser = async (req, res, next) => {
+    try {
+        let user_id = req.body.user_id;
+
+        const result = await UserModel.findOneAndDelete({ user_id });
+
+        if (result) {
+            return res.status(200).send({
+                status: true,
+                message: "user delete success",
+            });
+        } else {
+            return res.status(400).send({
+                status: false,
+                message: "user delete fail",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
 const getAllUser = async (req, res, next) => {
     try {
         const users = await UserModel.find({}, { __v: 0, _id: 0 });
@@ -147,6 +195,7 @@ const loginUser = async (req, res, next) => {
                     accessToken: accessToken,
                     user_id: user.user_id,
                     username: user.username,
+                    user_role_id: user.user_role_id,
                 });
             } else {
                 return res.status(403).send({
@@ -172,4 +221,6 @@ module.exports = {
     getUserProfile,
     getAllUser,
     getQACoordinator,
+    editUser,
+    deleteUser,
 };
