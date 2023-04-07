@@ -1,9 +1,11 @@
 const Post = require("../model/post.model");
 const Rating = require("../model/rating.model");
 const crypto = require("crypto");
-const converter = require("json-2-csv");
+const { parse } = require("json2csv");
 const fs = require("fs");
 const child_process = require("child_process");
+const _ = require("lodash");
+const AcademicYear = require("../model/academicYear.model");
 
 const getPostCount = async (req, res, next) => {
     try {
@@ -211,7 +213,7 @@ const viewPost = async (req, res, next) => {
 const viewMyPost = async (req, res, next) => {
     try {
         const posts = await Post.find(
-            { post_id: req.body.post_id },
+            { user_id: req.body.user_id },
             { _id: 0, __v: 0 }
         ).sort({
             post_date: -1,
@@ -363,42 +365,50 @@ const downloadAttachments = async (req, res, next) => {
 
 const downloadPosts = async (req, res, next) => {
     try {
-        const academicYearStart = req.body.academicYearStart;
-        const academicYearEnd = req.body.academicYearEnd;
-        const posts = await Post.find(
+        // const academicYearStart = req.body.academicYearStart;
+        // const academicYearEnd = req.body.academicYearEnd;
+
+        // console.log(new Date(Date.parse(academicYearStart)));
+        // console.log(new Date(Date.parse(academicYearEnd)));
+
+        const latestActiveAcademicYear = await AcademicYear.findOne(
             {
-                post_date: {
-                    $gte: new Date(Date.parse(academicYearStart)),
-                    $lt: new Date(Date.parse(academicYearEnd)),
-                },
+                active: true,
             },
-            { _id: 0, __v: 0 }
+            { __v: 0, _id: 0 }
         );
+
+        let posts = await Post.find({});
 
         console.log(posts);
 
         if (posts.length > 0) {
-            converter.json2csv(posts, (err, csv) => {
-                if (err) {
-                    console.log(err);
-                }
-                console.log("here");
+            posts.filter((p) => {
+                let str = p.post_date.split(" ")[0].split("/");
+                let str2 = `${str[2].replace(",", "")}-${str[1]}-${str[0]}`;
+                let tp = Date.parse(str2);
+                let ts = Date.parse(latestActiveAcademicYear.start_date);
+                let te = Date.parse(latestActiveAcademicYear.closure_date);
 
-                const csv_file_name =
-                    "idea_posts_" +
-                    academicYearStart +
-                    "_" +
-                    academicYearEnd +
-                    "_" +
-                    Date.now() +
-                    ".csv";
-
-                console.log(csv);
-
-                fs.writeFileSync(csv_file_name, csv);
-
-                return res.download(csv_file_name);
+                return tp >= ts && tp < te;
             });
+            const csv = parse(
+                posts.map((p) => {
+                    return _.omit(p._doc, [
+                        "__v",
+                        "_id",
+                        "post_comment_count",
+                        "post_view_count",
+                    ]);
+                })
+            );
+            const csv_file_name = "idea_posts_" + "_" + Date.now() + ".csv";
+
+            // console.log(csv);
+
+            fs.writeFileSync(csv_file_name, csv);
+
+            return res.download(csv_file_name);
         } else {
             return res.send({ status: false, message: "no posts found" });
         }
