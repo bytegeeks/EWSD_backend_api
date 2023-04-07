@@ -186,10 +186,9 @@ const createPost = async (req, res, next) => {
 const viewPost = async (req, res, next) => {
     try {
         const post_id = req.body.post_id;
-        const user_id = req.body.user_id;
 
         const post = await Post.findOne(
-            { post_id, user_id },
+            { post_id: post_id },
             { _id: 0, __v: 0 }
         );
 
