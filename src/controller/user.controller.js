@@ -16,7 +16,7 @@ const getAllUser = async (req, res, next) => {
                 users: users,
             });
         } else {
-            return res.status(200).send({
+            return res.status(400).send({
                 status: false,
                 message: "users fetched fail",
             });
@@ -39,7 +39,52 @@ const getQACoordinator = async (req, res, next) => {
                 users: users,
             });
         } else {
+            return res.status(400).send({
+                status: false,
+                message: "users fetched fail",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+const getQAManager = async (req, res, next) => {
+    try {
+        const users = await UserModel.find(
+            { user_role_id: Role.QA_MANAGER },
+            { __v: 0, _id: 0 }
+        );
+        if (users) {
             return res.status(200).send({
+                status: true,
+                message: "users fetched success",
+                users: users,
+            });
+        } else {
+            return res.status(400).send({
+                status: false,
+                message: "users fetched fail",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+const getStaff = async (req, res, next) => {
+    try {
+        const users = await UserModel.find(
+            { user_role_id: Role.STAFF },
+            { __v: 0, _id: 0 }
+        );
+        if (users) {
+            return res.status(200).send({
+                status: true,
+                message: "users fetched success",
+                users: users,
+            });
+        } else {
+            return res.status(400).send({
                 status: false,
                 message: "users fetched fail",
             });
@@ -172,4 +217,6 @@ module.exports = {
     getUserProfile,
     getAllUser,
     getQACoordinator,
+    getQAManager,
+    getStaff
 };
