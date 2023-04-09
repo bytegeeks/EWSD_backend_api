@@ -11,5 +11,7 @@ router.post("/get-all-user", authentication, UserController.getAllUser);
 router.post("/get-qa-coor", authentication, UserController.getQACoordinator);
 router.post("/get-qa-manager", authentication, UserController.getQAManager);
 router.post("/get-staff", authentication, UserController.getStaff);
+router.post("/edit-user", authentication, UserController.editUser);
+router.post("/delete-user", authentication, UserController.deleteUser);
 
 module.exports = router;

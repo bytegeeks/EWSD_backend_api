@@ -1,6 +1,11 @@
 const Post = require("../model/post.model");
 const Rating = require("../model/rating.model");
 const crypto = require("crypto");
+const { parse } = require("json2csv");
+const fs = require("fs");
+const child_process = require("child_process");
+const _ = require("lodash");
+const AcademicYear = require("../model/academicYear.model");
 
 const getPostCount = async (req, res, next) => {
     try {
@@ -181,10 +186,9 @@ const createPost = async (req, res, next) => {
 const viewPost = async (req, res, next) => {
     try {
         const post_id = req.body.post_id;
-        const user_id = req.body.user_id;
 
         const post = await Post.findOne(
-            { post_id, user_id },
+            { post_id: post_id },
             { _id: 0, __v: 0 }
         );
 
@@ -203,6 +207,30 @@ const viewPost = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+const viewMyPost = async (req, res, next) => {
+    try {
+        const posts = await Post.find(
+            { user_id: req.body.user_id },
+            { _id: 0, __v: 0 }
+        ).sort({
+            post_date: -1,
+        });
+
+        if (posts) {
+            return res.status(200).send({
+                status: true,
+                message: "post fetched successfully",
+                data: posts,
+            });
+        } else {
+            return res.status(400).send({
+                status: false,
+                message: "posts fetch failed",
+            });
+        }
+    } catch (error) {}
 };
 
 const viewAllPost = async (req, res, next) => {
@@ -327,6 +355,67 @@ const editPost = async (req, res, next) => {
     }
 };
 
+const downloadAttachments = async (req, res, next) => {
+    const folderPath = "public/upload";
+    child_process.execSync("zip -r archive *", { cwd: folderPath });
+
+    res.download(folderPath + "/archive.zip");
+};
+
+const downloadPosts = async (req, res, next) => {
+    try {
+        // const academicYearStart = req.body.academicYearStart;
+        // const academicYearEnd = req.body.academicYearEnd;
+
+        // console.log(new Date(Date.parse(academicYearStart)));
+        // console.log(new Date(Date.parse(academicYearEnd)));
+
+        const latestActiveAcademicYear = await AcademicYear.findOne(
+            {
+                active: true,
+            },
+            { __v: 0, _id: 0 }
+        );
+
+        let posts = await Post.find({});
+
+        console.log(posts);
+
+        if (posts.length > 0) {
+            posts.filter((p) => {
+                let str = p.post_date.split(" ")[0].split("/");
+                let str2 = `${str[2].replace(",", "")}-${str[1]}-${str[0]}`;
+                let tp = Date.parse(str2);
+                let ts = Date.parse(latestActiveAcademicYear.start_date);
+                let te = Date.parse(latestActiveAcademicYear.closure_date);
+
+                return tp >= ts && tp < te;
+            });
+            const csv = parse(
+                posts.map((p) => {
+                    return _.omit(p._doc, [
+                        "__v",
+                        "_id",
+                        "post_comment_count",
+                        "post_view_count",
+                    ]);
+                })
+            );
+            const csv_file_name = "idea_posts_" + "_" + Date.now() + ".csv";
+
+            // console.log(csv);
+
+            fs.writeFileSync(csv_file_name, csv);
+
+            return res.download(csv_file_name);
+        } else {
+            return res.send({ status: false, message: "no posts found" });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createPost,
     viewPost,
@@ -338,4 +427,7 @@ module.exports = {
     likePost,
     dislikePost,
     getPostCount,
+    viewMyPost,
+    downloadPosts,
+    downloadAttachments,
 };

@@ -1,6 +1,32 @@
 const AcademicYear = require("../model/academicYear.model");
 const crypto = require("crypto");
 
+const getLatestActiveAcademicYear = async (req, res, next) => {
+    try {
+        const latestActiveAcademicYear = await AcademicYear.findOne(
+            {
+                active: true,
+            },
+            { __v: 0, _id: 0 }
+        );
+
+        if (latestActiveAcademicYear) {
+            return res.status(200).send({
+                status: true,
+                message: "latest academic year fetched successfully",
+                data: latestActiveAcademicYear,
+            });
+        } else {
+            return res.status(400).send({
+                status: false,
+                message: "latest academic year fetch failed",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
 const createAcademicYear = async (req, res, next) => {
     try {
         let academicYear = req.body.academicYear;
@@ -87,10 +113,50 @@ const viewAllAcademicYear = async (req, res, next) => {
     }
 };
 
+const deleteAcademicYear = async (req, res, next) => {
+    try {
+        let academic_year_id = req.body.academic_year_id;
+
+        const res1 = await AcademicYear.findOne({ academic_year_id });
+        if (res1) {
+            if (res1.active) {
+                return res.status(400).send({
+                    status: false,
+                    message: "academic year delete failed",
+                });
+            }
+        }
+
+        const result = await AcademicYear.deleteOne({ academic_year_id });
+
+        if (result) {
+            return res.status(200).send({
+                status: true,
+                message: "academic year delete success",
+            });
+        } else {
+            return res.status(400).send({
+                status: false,
+                message: "academic year delete failed",
+            });
+        }
+    } catch (error) {}
+};
+
 const editAcademicYear = async (req, res, next) => {
     try {
         let academic_year_id = req.body.academic_year_id;
         let new_academic_year_params = req.body.academicYear;
+
+        if (!new_academic_year_params.active) {
+            const res1 = await AcademicYear.find({ active: true });
+            if (res1.length <= 1) {
+                return res.status(400).send({
+                    status: false,
+                    message: "must have at least one active academic year",
+                });
+            }
+        }
 
         const result = await AcademicYear.findOneAndUpdate(
             { academic_year_id },
@@ -118,4 +184,6 @@ module.exports = {
     viewAcademicYear,
     editAcademicYear,
     viewAllAcademicYear,
+    getLatestActiveAcademicYear,
+    deleteAcademicYear,
 };
