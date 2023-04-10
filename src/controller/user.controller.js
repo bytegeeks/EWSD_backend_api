@@ -34,7 +34,7 @@ const editUser = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
     try {
-        let user_id = req.body.user_id;
+        let user_id = req.body.t_user_id;
 
         const result = await UserModel.findOneAndDelete({ user_id });
 
@@ -144,7 +144,7 @@ const getStaff = async (req, res, next) => {
 
 const getUserProfile = async (req, res, next) => {
     try {
-        const user_id = req.body.user_id;
+        const user_id = req.body.t_user_id;
         const user = await UserModel.findOne({ user_id }, { __v: 0, _id: 0 });
         if (user) {
             return res.status(200).send({
@@ -267,7 +267,7 @@ module.exports = {
     getAllUser,
     getQACoordinator,
     getQAManager,
-    getStaff
+    getStaff,
     editUser,
     deleteUser,
 };

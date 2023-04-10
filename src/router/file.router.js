@@ -7,7 +7,7 @@ const authentication = require("../utils/middleware/auth.middleware");
 
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "/home/wathone/Desktop/EWSD_backend_api/public/upload");
+        cb(null, "/home/alex/Documents/uni/EWSD/EWSD_backend/public/upload");
     },
     filename: (req, file, cb) => {
         cb(

@@ -1,12 +1,45 @@
 const Comment = require("../model/comment.model");
+const Post = require("../model/post.model");
+const User = require("../model/user.model");
 const crypto = require("crypto");
+const sendEmail = require("../utils/email.util");
 
 const createComment = async (req, res, next) => {
     try {
         let comment = req.body.comment;
         comment["comment_id"] = crypto.randomUUID();
 
+        const post_id = comment.post_id;
+
+        const post = await Post.findOne({ post_id: post_id });
+
+        if (post) {
+            const post_owner_user_id = post.user_id;
+            const post_owner = await User.findOne({
+                user_id: post_owner_user_id,
+            });
+
+            if (post_owner) {
+                const post_owner_email = post_owner.user_email;
+                if (post_owner_email) {
+                    try {
+                        sendEmail(
+                            post_owner_email,
+                            "SOMEONE COMMENTED ON YOUR POST",
+                            `Someone commented ${comment.comment_content} on your post.`
+                        );
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+            }
+        }
+
         const commentRes = await new Comment(comment).save();
+        await Post.findOneAndUpdate(
+            { post_id: post_id },
+            { $inc: {post_comment_count: 1} }
+        );
 
         if (commentRes) {
             return res.status(201).send({

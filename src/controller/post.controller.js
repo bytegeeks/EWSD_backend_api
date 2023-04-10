@@ -6,6 +6,9 @@ const fs = require("fs");
 const child_process = require("child_process");
 const _ = require("lodash");
 const AcademicYear = require("../model/academicYear.model");
+const User = require("../model/user.model");
+const sendEmail = require("../utils/email.util");
+const Role = require("../utils/fixtures/role.enum");
 
 const getPostCount = async (req, res, next) => {
     try {
@@ -167,7 +170,28 @@ const createPost = async (req, res, next) => {
         post["user_id"] = req.body.user_id;
 
         const postRes = await new Post(post).save();
+
         if (postRes) {
+            // get list of qa coordinators
+            const qaCoor = await User.find({
+                user_role_id: Role.QA_COORDINATOR,
+            });
+            if (qaCoor) {
+                for (let i = 0; i < qaCoor.length; i++) {
+                    const qaEmail = qaCoor[i].user_email;
+                    if (qaEmail) {
+                        try {
+                            sendEmail(
+                                qaEmail,
+                                "NEW IDEA POST SUBMISSION",
+                                `A user with user ID ${post["user_id"]} submitted an idea post!`
+                            );
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    }
+                }
+            }
             return res.status(201).send({
                 status: true,
                 message: "post create success",
@@ -267,6 +291,7 @@ const viewPopularPost = async (req, res, next) => {
     try {
         const posts = await Post.find({}, { _id: 0, __v: 0 }).sort({
             post_likes: -1,
+            post_comment_count: -1,
         });
         if (posts) {
             return res.status(200).send({
